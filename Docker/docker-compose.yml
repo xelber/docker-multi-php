@@ -1,0 +1,44 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: './nginx/'
+    ports:
+      - "8090:80"
+    volumes:
+      - ../sites/default:/var/www/html
+    container_name: nginx
+    links:
+      - php
+  php:
+    build:
+      context: './php/'
+      args:
+        - PHP_VERSION=${PHP_VERSION:-7.3}
+        - WITH_XDEBUG=${WITH_XDEBUG:-0}
+        - GIT_USER=${GIT_USER}
+        - GIT_EMAIL=${GIT_EMAIL}
+    ports:
+      - "9000:9000"
+    volumes:
+      - ../sites/default:/var/www/html
+    container_name: php
+    env_file: .env
+
+  php_classic:
+    build:
+      context: './php_classic/'
+      args:
+        - PHP_VERSION=${PHP_VERSION:-7.3}
+        - WITH_XDEBUG=${WITH_XDEBUG:-0}
+        - GIT_USER=${GIT_USER}
+        - GIT_EMAIL=${GIT_EMAIL}
+    ports:
+      - "9010:9000"
+    volumes:
+      - ../sites/classic/public:/var/www/html/
+    container_name: php_classic
+    env_file: .env
+    
+volumes:
+  data:
