@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
         libpng-dev \
         libmcrypt-dev \
         libzip-dev \
+        zlib1g-dev libicu-dev g++ \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mysqli \
@@ -24,9 +25,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install calendar \
     && docker-php-ext-install zip
 
-RUN pecl install mongodb \
-    &&  echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongo.ini \
-    && pecl install mcrypt \
+RUN pecl install mcrypt \
     && docker-php-ext-enable mcrypt
 
 COPY php.ini /usr/local/etc/php/conf.d/php.ini
@@ -36,10 +35,9 @@ RUN curl https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin
 RUN if [ "$WITH_XDEBUG" = "1" ] ; then pecl install xdebug; docker-php-ext-enable xdebug; fi
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
-RUN wget https://get.symfony.com/cli/installer -O - | bash
-RUN mv /root/.symfony/bin/symfony /usr/local/bin/symfony
 
 RUN git config --global user.email "$GIT_EMAIL"
 RUN git config --global user.name "$GIT_USER"
 
 RUN apt-get install -y npm
+RUN docker-php-ext-install intl
