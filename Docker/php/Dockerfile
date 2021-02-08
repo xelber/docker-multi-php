@@ -17,12 +17,17 @@ RUN apt-get update && apt-get install -y \
         libpng-dev \
         libmcrypt-dev \
         libzip-dev \
+        zlib1g-dev \
+        libicu-dev \
+        g++ \
     && docker-php-ext-configure gd \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install mysqli \
     && docker-php-ext-install pdo_mysql \
     && docker-php-ext-install calendar \
-    && docker-php-ext-install zip
+    && docker-php-ext-install zip \
+    && docker-php-ext-install intl \
+    && docker-php-ext-install bcmath
 
 RUN pecl install mongodb \
     &&  echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/mongo.ini \
@@ -43,3 +48,4 @@ RUN git config --global user.email "$GIT_EMAIL"
 RUN git config --global user.name "$GIT_USER"
 
 RUN apt-get install -y npm
+RUN apt-get install -y nodejs

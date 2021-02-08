@@ -10,6 +10,8 @@ services:
     container_name: nginx
     links:
       - php
+      - php_classic
+
   php:
     build:
       context: './php/'
@@ -24,6 +26,10 @@ services:
       - ../sites/default:/var/www/html
     container_name: php
     env_file: .env
+    links:
+      - elasticsearch
+      - db
+      - redis
 
   php_classic:
     build:
@@ -36,9 +42,81 @@ services:
     ports:
       - "9010:9000"
     volumes:
-      - ../sites/classic/public:/var/www/html/
+      - ../sites/classic:/var/www/html
     container_name: php_classic
     env_file: .env
-    
+    links:
+      - elasticsearch
+      - db
+      - redis
+
+  #following aren't needed for production
+
+  db:
+    image: mariadb:latest
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ../sites/shared:/shared
+    environment:
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=password
+    ports:
+      - '3307:3306'
+    expose:
+      - 3306
+    container_name: mysql
+
+  redis:
+    image: redis
+    container_name: redis
+    expose:
+      - 6379
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8091:8080
+    container_name: adminer
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.4.0
+    container_name: elasticsearch
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./synonym.txt:/usr/share/elasticsearch/config/analysis/synonym.txt
+    ports:
+      - 9201:9200
+      - 9301:9300
+
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.4.0
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - 5602:5601
+    depends_on:
+      - elasticsearch
+
+
 volumes:
   data:
+  elasticsearch-data:
+    driver: local
