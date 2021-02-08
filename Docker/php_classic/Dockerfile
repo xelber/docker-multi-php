@@ -1,4 +1,4 @@
-ARG CLASSIC_PHP_VERSION=7.2
+ARG CLASSIC_PHP_VERSION=7.1
 FROM php:$CLASSIC_PHP_VERSION-fpm
 
 ARG WITH_XDEBUG=0
@@ -25,8 +25,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install calendar \
     && docker-php-ext-install zip
 
-RUN pecl install mcrypt \
-    && docker-php-ext-enable mcrypt
 
 COPY php.ini /usr/local/etc/php/conf.d/php.ini
 
@@ -35,9 +33,12 @@ RUN curl https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin
 RUN if [ "$WITH_XDEBUG" = "1" ] ; then pecl install xdebug; docker-php-ext-enable xdebug; fi
 COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
-
 RUN git config --global user.email "$GIT_EMAIL"
 RUN git config --global user.name "$GIT_USER"
 
 RUN apt-get install -y npm
 RUN docker-php-ext-install intl
+
+RUN pecl channel-update pecl.php.net
+RUN pecl install -f mcrypt-1.0.1
+COPY mcrypt.ini /usr/local/etc/php/conf.d/mcrypt.ini
