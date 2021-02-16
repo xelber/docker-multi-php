@@ -6,7 +6,11 @@ services:
     ports:
       - "8090:80"
     volumes:
-      - ../sites/default:/var/www/html
+      - ../sites/classic:/var/www/html
+      - ../sites/default/public/css/app.css:/var/www/html/public/css/app.css
+      - ../sites/default/public/js/app.js:/var/www/html/public/js/app.js
+      - ../sites/default/public/images/favicons:/var/www/html/public/images/favicons
+      - ../sites/default/public/images/michaels-fruits:/var/www/html/public/images/michaels-fruits
     container_name: nginx
     links:
       - php
