@@ -1,16 +1,17 @@
-version: '3'
+#version: '3'
 services:
   nginx:
     build:
       context: './nginx/'
+    networks:
+      default:
+        aliases:
+          - new.web
+          - old.web
     ports:
       - "8090:80"
     volumes:
-      - ../sites/classic:/var/www/html
-      - ../sites/default/public/css/app.css:/var/www/html/public/css/app.css
-      - ../sites/default/public/js/app.js:/var/www/html/public/js/app.js
-      - ../sites/default/public/images/favicons:/var/www/html/public/images/favicons
-      - ../sites/default/public/images/michaels-fruits:/var/www/html/public/images/michaels-fruits
+      - ../sites/default:/var/www/html
     container_name: nginx
     links:
       - php
@@ -39,7 +40,8 @@ services:
     build:
       context: './php_classic/'
       args:
-        - PHP_VERSION=${PHP_VERSION:-7.3}
+        - PHP_VERSION=${PHP_VERSION:-7.1}
+        - CLASSIC_PHP_VERSION=${CLASSIC_PHP_VERSION:-7.1}
         - WITH_XDEBUG=${WITH_XDEBUG:-0}
         - GIT_USER=${GIT_USER}
         - GIT_EMAIL=${GIT_EMAIL}
@@ -103,7 +105,7 @@ services:
     cap_add:
       - IPC_LOCK
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./data/elasticsearch:/usr/share/elasticsearch/data
       - ./synonym.txt:/usr/share/elasticsearch/config/analysis/synonym.txt
     ports:
       - 9201:9200

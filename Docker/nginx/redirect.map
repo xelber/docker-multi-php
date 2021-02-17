@@ -1,0 +1,3 @@
+/new 1;
+/phpinfo-new-force 1;
+~marketplace.*$ 1;
